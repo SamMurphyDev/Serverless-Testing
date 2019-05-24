@@ -9,17 +9,19 @@
     "chai": "^4.2.0",
     "file-system": "^2.2.2",
     "loadash": "^1.0.0",
-    "mocha": "^6.1.4",
     "mustache": "^3.0.1",
     "serverless-pseudo-parameters": "^2.4.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.460.0",
     "awscred": "^1.4.2",
+    "cheerio": "^1.0.0-rc.3",
+    "mocha": "^6.1.4",
     "serverless": "^1.43.0"
   },
   "scripts": {
-    "integration-test": "./node_modules/.bin/mocha tests/test-cases --reporter spec"
+    "integration-test": "env TEST_MODE=handler ./node_modules/.bin/mocha tests/test-cases --reporter spec --timeout 5000",
+    "acceptance-test": "env TEST_MODE=http TEST_ROOT=https://rqpsqbjlw7.execute-api.ap-southeast-2.amazonaws.com/dev ./node_modules/.bin/mocha tests/test-cases --reporter spec --timeout 5000"
   },
   "author": "",
   "license": "ISC"

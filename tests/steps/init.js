@@ -16,14 +16,11 @@ let init = async function() {
   process.env.cognito_client_id = '69o22b6dfgt2s2cpa1t0kbbgv';
   process.env.cognito_user_pool_id = 'ap-southeast-2_pxs41rjSB';
 
-  await awscred.load(function(err, data) {
-    if (err) throw error;
-
-    console.log(data);
-
-    process.env.AWS_ACCESS_KEY_ID = data.credentials.accessKeyId;
-    process.env.AWS_SECRET_ACCESS_KEY = data.credentials.secretAccessKey;
-  });
+  let { credentials } = await new Promise(resolve =>
+    awscred.load((err, data) => resolve(data))
+  );
+  process.env.AWS_ACCESS_KEY_ID = credentials.accessKeyId;
+  process.env.AWS_SECRET_ACCESS_KEY = credentials.secretAccessKey;
 
   initialised = true;
 };

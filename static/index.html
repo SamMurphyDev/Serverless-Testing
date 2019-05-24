@@ -1,64 +1,165 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <title>Serverless Testing Page</title>
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
-    />
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-      crossorigin="anonymous"
-    ></script>
+    <meta charset="UTF-8" />
+    <title>Big Mouth</title>
+
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.149.0.min.js"></script>
     <script src="https://d2qt42rcwzspd6.cloudfront.net/manning/aws-cognito-sdk.min.js"></script>
     <script src="https://d2qt42rcwzspd6.cloudfront.net/manning/amazon-cognito-identity.min.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+
+    <style>
+      .fullscreenDiv {
+        background-color: #05bafd;
+        width: 100%;
+        height: auto;
+        bottom: 0px;
+        top: 0px;
+        left: 0;
+        position: absolute;
+      }
+      .restaurantsDiv {
+        background-color: #ffffff;
+        width: 100%;
+        height: auto;
+      }
+      .dayOfWeek {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 32px;
+        padding: 10px;
+        height: auto;
+        display: flex;
+        justify-content: center;
+      }
+      .column-container {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        display: flex;
+        flex-flow: column;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .row-container {
+        padding: 5px;
+        margin: 5px;
+        list-style: none;
+        display: flex;
+        flex-flow: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .item {
+        padding: 5px;
+        height: auto;
+        margin-top: 10px;
+        display: flex;
+        flex-flow: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .restaurant {
+        background-color: #00a8f7;
+        border-radius: 10px;
+        padding: 5px;
+        height: auto;
+        width: auto;
+        margin-left: 40px;
+        margin-right: 40px;
+        margin-top: 15px;
+        margin-bottom: 0px;
+        display: flex;
+        justify-content: center;
+      }
+      .restaurant-name {
+        font-size: 24px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #ffffff;
+        padding: 10px;
+        margin: 0px;
+      }
+      .restaurant-image {
+        padding-top: 0px;
+        margin-top: 0px;
+      }
+      .row-container-left {
+        list-style: none;
+        display: flex;
+        flex-flow: row;
+        justify-content: flex-start;
+      }
+      .menu-text {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+      }
+      .text-trail-space {
+        margin-right: 10px;
+      }
+      .hidden {
+        display: none;
+      }
+
+      lable,
+      button,
+      input {
+        display: block;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+      }
+
+      fieldset {
+        padding: 0;
+        border: 0;
+        margin-top: 25px;
+      }
+    </style>
 
     <script>
       const AWS_REGION = '{{awsRegion}}';
       const COGNITO_USER_POOL_ID = '{{cognitoUserPoolId}}';
       const CLIENT_ID = '{{cognitoClientId}}';
       const SEARCH_URL = '{{& searchUrl}}';
+      const PLACE_ORDER_URL = '{{& placeOrderUrl}}';
+
       var regDialog, regForm;
-      var verifyDialog, verifyForm;
+      var verifyDialog;
       var regCompleteDialog;
-      var signInDialog, signInForm;
+      var signInDialog;
       var userPool, cognitoUser;
       var idToken;
+
       function toggleSignOut(enable) {
-        enable === true
-          ? $('#signOutButton').show()
-          : $('#signOutButton').hide();
+        enable === true ? $('#sign-out').show() : $('#sign-out').hide();
       }
+
       function toggleSignIn(enable) {
-        enable === true ? $('#loginButton').show() : $('loginButton').hide();
+        enable === true ? $('#sign-in').show() : $('#sign-in').hide();
       }
+
       function toggleRegister(enable) {
-        enable === true
-          ? $('#registerButton').show()
-          : $('#registerButton').hide();
+        enable === true ? $('#register').show() : $('#register').hide();
       }
+
       function init() {
         AWS.config.region = AWS_REGION;
         AWSCognito.config.region = AWS_REGION;
+
         var data = {
           UserPoolId: COGNITO_USER_POOL_ID,
           ClientId: CLIENT_ID,
@@ -67,16 +168,19 @@
           data
         );
         cognitoUser = userPool.getCurrentUser();
+
         if (cognitoUser != null) {
           cognitoUser.getSession(function(err, session) {
             if (err) {
               alert(err);
               return;
             }
+
             idToken = session.idToken.jwtToken;
             console.log('idToken: ' + idToken);
             console.log('session validity: ' + session.isValid());
           });
+
           toggleSignOut(true);
           toggleSignIn(false);
           toggleRegister(false);
@@ -86,12 +190,14 @@
           toggleRegister(true);
         }
       }
+
       function addUser() {
-        var firstName = $('#registerFirstName')[0].value;
-        var lastName = $('#registerLastName')[0].value;
-        var username = $('#registerUserName')[0].value;
-        var password = $('#registerPassword')[0].value;
-        var email = $('#regitserEmail')[0].value;
+        var firstName = $('#first-name')[0].value;
+        var lastName = $('#last-name')[0].value;
+        var username = $('#username')[0].value;
+        var password = $('#password')[0].value;
+        var email = $('#email')[0].value;
+
         var attributeList = [
           new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute({
             Name: 'email',
@@ -106,6 +212,7 @@
             Value: lastName,
           }),
         ];
+
         userPool.signUp(username, password, attributeList, null, function(
           err,
           result
@@ -116,12 +223,14 @@
           }
           cognitoUser = result.user;
           console.log('user name is ' + cognitoUser.getUsername());
-          regDialog.modal('hide');
-          verifyDialog.modal('show');
+
+          regDialog.dialog('close');
+          verifyDialog.dialog('open');
         });
       }
+
       function confirmUser() {
-        var verificationCode = $('#verifyCode')[0].value;
+        var verificationCode = $('#verification-code')[0].value;
         cognitoUser.confirmRegistration(verificationCode, true, function(
           err,
           result
@@ -131,13 +240,16 @@
             return;
           }
           console.log('verification call result: ' + result);
-          verifyDialog.modal('hide');
-          regCompleteDialog.modal('show');
+
+          verifyDialog.dialog('close');
+          regCompleteDialog.dialog('open');
         });
       }
+
       function authenticateUser() {
-        var username = $('#loginUsername')[0].value;
-        var password = $('#loginPassword')[0].value;
+        var username = $('#sign-in-username')[0].value;
+        var password = $('#sign-in-password')[0].value;
+
         var authenticationData = {
           Username: username,
           Password: password,
@@ -152,6 +264,7 @@
         var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(
           userData
         );
+
         cognitoUser.authenticateUser(authenticationDetails, {
           onSuccess: function(result) {
             console.log(
@@ -160,16 +273,19 @@
             /*Use the idToken for Logins Map when Federating User Pools with Cognito Identity or when passing through an Authorization Header to an API Gateway Authorizer*/
             idToken = result.idToken.jwtToken;
             console.log('idToken : ' + idToken);
-            signInDialog.modal('hide');
+
+            signInDialog.dialog('close');
             toggleRegister(false);
             toggleSignIn(false);
             toggleSignOut(true);
           },
+
           onFailure: function(err) {
             alert(err);
           },
         });
       }
+
       function signOut() {
         if (cognitoUser != null) {
           cognitoUser.signOut();
@@ -178,8 +294,10 @@
           toggleSignOut(false);
         }
       }
+
       function searchRestaurants() {
         var theme = $('#theme')[0].value;
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', SEARCH_URL, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -191,339 +309,254 @@
             var restaurants = JSON.parse(xhr.responseText);
             var restaurantsList = $('#restaurantsUl');
             restaurantsList.empty();
+
             for (var restaurant of restaurants) {
               restaurantsList.append(`
-                <div class="col-md-4">
-                    <div class="card mb-4 box-shadow">
-                        <img class="card-img-top" src="${restaurant.image}">
-                        <div class="card-body">
-                                ${restaurant.name}
-                        </div>
-                    </div>
-                </div>
-                `);
+              <li class="restaurant">
+                <ul class="column-container" onclick='placeOrder("${
+                  restaurant.name
+                }")'>
+                    <li class="item restaurant-name">${restaurant.name}</li>
+                    <li class="item restaurant-image">
+                      <img src="${restaurant.image}">
+                    </li>
+                </ul>
+              </li>
+              `);
             }
           } else if (xhr.readyState === 4) {
             alert(xhr.responseText);
           }
         };
       }
+
+      function placeOrder(restaurantName) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', PLACE_ORDER_URL, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Authorization', idToken);
+        xhr.send(JSON.stringify({ restaurantName }));
+
+        xhr.onreadystatechange = function(e) {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            alert(
+              "your order has been placed, we'll let you know once it's been accepted by the restaurant!"
+            );
+          } else if (xhr.readyState === 4) {
+            alert(xhr.responseText);
+          }
+        };
+      }
+
       $(document).ready(function() {
-        regDialog = $('#registerModal');
+        regDialog = $('#reg-dialog-form').dialog({
+          autoOpen: false,
+          modal: true,
+          buttons: {
+            'Create an account': addUser,
+            Cancel: function() {
+              regDialog.dialog('close');
+            },
+          },
+          close: function() {
+            regForm[0].reset();
+          },
+        });
+
         regForm = regDialog.find('form').on('submit', function(event) {
           event.preventDefault();
           addUser();
         });
 
-        verifyDialog = $('#verifyModal');
-        verifyForm = verifyDialog.find('form').on('submit', function(event) {
-          event.preventDefault();
-          confirmUser();
+        $('#register').on('click', function() {
+          regDialog.dialog('open');
         });
 
-        regCompleteDialog = $('#registerCompleteModal');
-
-        signInDialog = $('#loginModal');
-        signInForm = signInDialog.find('form').on('submit', function(event) {
-          event.preventDefault();
-          authenticateUser();
+        verifyDialog = $('#verify-dialog-form').dialog({
+          autoOpen: false,
+          modal: true,
+          buttons: {
+            'Confirm registration': confirmUser,
+            Cancel: function() {
+              verifyDialog.dialog('close');
+            },
+          },
+          close: function() {
+            $(this).dialog('close');
+          },
         });
+
+        regCompleteDialog = $('#registered-message').dialog({
+          autoOpen: false,
+          modal: true,
+          buttons: {
+            Ok: function() {
+              $(this).dialog('close');
+            },
+          },
+        });
+
+        signInDialog = $('#sign-in-form').dialog({
+          autoOpen: false,
+          modal: true,
+          buttons: {
+            'Sign in': authenticateUser,
+            Cancel: function() {
+              signInDialog.dialog('close');
+            },
+          },
+          close: function() {
+            $(this).dialog('close');
+          },
+        });
+
+        $('#sign-in').on('click', function() {
+          signInDialog.dialog('open');
+        });
+
+        $('#sign-out').on('click', function() {
+          signOut();
+        });
+
         init();
       });
     </script>
   </head>
 
   <body>
-    <header>
-      <div class="navbar narbar-dark bg-dark box-shadow">
-        <div class="container">
-          <a href="#" class="navbar-brand">Serverless Test Site</a>
-          <nav class="my-2 my-md-0 mr-md-3">
-            <input
-              type="text"
-              placeholder="Search"
-              class="form-control"
-              id="theme"
-            />
-            <button
-              class="p-2 btn btn-primary"
-              type="button"
-              onclick="searchRestaurants()"
-            >
-              Search
-            </button>
-            <button
-              id="registerButton"
-              class="p-2 btn btn-primary hidden"
-              type="button"
-              data-toggle="modal"
-              data-target="#registerModal"
-            >
-              Register
-            </button>
-            <button
-              id="loginButton"
-              class="p-2 btn btn-primary hidden"
-              type="button"
-              data-toggle="modal"
-              data-target="#loginModal"
-            >
-              Sign In
-            </button>
-            <button
-              id="signOutButton"
-              class="p-2 btn btn-danger hidden"
-              onclick="signOut()"
-            >
-              Sign Out
-            </button>
-          </nav>
-        </div>
-      </div>
-    </header>
-    <main role="main">
-      <section class="jumbotron">
-        <div class="container">
-          <div class="row" id="restaurantsUl">
-            {{#restaurants}}
-            <div class="col-md-4">
-              <div class="card mb-4 box-shadow">
-                <img class="card-img-top" src="{{ image }}" />
-                <div class="card-body">
-                  {{ name }}
-                </div>
-              </div>
-            </div>
-            {{/restaurants}}
-          </div>
-        </div>
-      </section>
-    </main>
-    <div
-      class="modal fade"
-      id="loginModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="Sign In"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <form>
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLongTitle">Sign In</h5>
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="loginUsername">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="loginUsername"
-                  placeholder="John123"
-                />
-              </div>
-              <div class="form-group">
-                <label for="loginPassword">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="loginPassword"
-                  placeholder="Password"
-                />
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
-              <button type="submit" class="btn btn-primary">Sign In</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-    <div
-      class="modal fade"
-      id="registerModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="Register"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <form>
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="register">Register</h5>
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="registerFirstName">First Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="registerFirstName"
-                  placeholder="John"
-                />
-              </div>
-              <div class="form-group">
-                <label for="registerLastName">Last Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="registerLastName"
-                  placeholder="Pattrick"
-                />
-              </div>
-              <div class="form-group">
-                <label for="regitserEmail">Email Address</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="regitserEmail"
-                  aria-describedby="emailRegisterHelp"
-                  placeholder="john@example.com"
-                />
-                <small id="emailRegisterHelp" class="form-text text-muted"
-                  >We'll never share your email with anyone else.</small
+    <div class="fullscreenDiv">
+      <ul class="column-container">
+        <li>
+          <ul class="row-container-left">
+            <li id="register" class="item text-trail-space hidden">
+              <a class="menu-text" href="#">Register</a>
+            </li>
+            <li id="sign-in" class="item menu-text text-trail-space hidden">
+              <a class="menu-text" href="#">Sign in</a>
+            </li>
+            <li id="sign-out" class="item menu-text text-trail-space hidden">
+              <a class="menu-text" href="#">Sign out</a>
+            </li>
+          </ul>
+        </li>
+        <li class="item">
+          <img
+            id="logo"
+            src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png"
+          />
+        </li>
+        <li class="item">
+          <input
+            id="theme"
+            type="text"
+            size="50"
+            placeholder="enter a theme, eg. rick and morty"
+          />
+          <button onclick="searchRestaurants()">Find Restaurants</button>
+        </li>
+        <li>
+          <div class="restaurantsDiv column-container">
+            <b class="dayOfWeek">{{ dayOfWeek }}</b>
+            <ul id="restaurantsUl" class="row-container">
+              {{#restaurants}}
+              <li class="restaurant">
+                <ul
+                  class="column-container"
+                  onclick="placeOrder(&quot;{{ name }}&quot;)"
                 >
-              </div>
-              <div class="form-group">
-                <label for="registerUserName">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="registerUserName"
-                  placeholder="John123"
-                />
-              </div>
-              <div class="form-group">
-                <label for="registerPassword">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="registerPassword"
-                  placeholder="Password"
-                />
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
-              <button type="submit" class="btn btn-primary">Register</button>
-            </div>
+                  <li class="item restaurant-name">{{ name }}</li>
+                  <li class="item restaurant-image">
+                    <img src="{{ image }}" />
+                  </li>
+                </ul>
+              </li>
+              {{/restaurants}}
+            </ul>
           </div>
-        </form>
-      </div>
+        </li>
+      </ul>
     </div>
-    <div
-      class="modal fade"
-      id="registerCompleteModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="Registation Complete"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="registerComplete">Register Complete</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Registration is now completed, continue to use the website</p>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
+
+    <div id="reg-dialog-form" title="Register">
+      <form>
+        <fieldset>
+          <label for="first-name">First Name</label>
+          <input
+            type="text"
+            id="first-name"
+            class="text ui-widget-content ui-corner-all"
+          />
+          <label for="last-name">Last Name</label>
+          <input
+            type="text"
+            id="last-name"
+            class="text ui-widget-content ui-corner-all"
+          />
+          <label for="email">Email</label>
+          <input
+            type="text"
+            name="email"
+            id="email"
+            class="text ui-widget-content ui-corner-all"
+          />
+          <label for="username">Username</label>
+          <input
+            type="text"
+            name="username"
+            id="username"
+            class="text ui-widget-content ui-corner-all"
+          />
+          <label for="password">Password</label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            class="text ui-widget-content ui-corner-all"
+          />
+        </fieldset>
+      </form>
     </div>
-    <div
-      class="modal fade"
-      id="verifyModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="Verify Account"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <form>
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="verify">Register</h5>
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="verifyCode">Verification Code</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="verifyCode"
-                  placeholder="123456"
-                />
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary">Verify</button>
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+
+    <div id="verify-dialog-form" title="Verify">
+      <form>
+        <fieldset>
+          <label for="verification-code">Verification Code</label>
+          <input
+            type="text"
+            id="verification-code"
+            class="text ui-widget-content ui-corner-all"
+          />
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="registered-message" title="Registration complete!">
+      <p>
+        <span
+          class="ui-icon ui-icon-circle-check"
+          style="float:left; margin:0 7px 50px 0;"
+        ></span>
+        You are now registered!
+      </p>
+    </div>
+
+    <div id="sign-in-form" title="Sign in">
+      <form>
+        <fieldset>
+          <label for="sign-in-username">Username</label>
+          <input
+            type="text"
+            id="sign-in-username"
+            class="text ui-widget-content ui-corner-all"
+          />
+          <label for="sign-in-password">Password</label>
+          <input
+            type="password"
+            id="sign-in-password"
+            class="text ui-widget-content ui-corner-all"
+          />
+        </fieldset>
+      </form>
     </div>
   </body>
 </html>

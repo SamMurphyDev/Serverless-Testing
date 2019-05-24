@@ -30,13 +30,6 @@ async function getRestaurants() {
     method: 'GET',
   };
 
-  if (!process.env.AWS_ACCESS_KEY_ID) {
-    const { credentials } = await awscred.load();
-
-    process.env.AWS_ACCESS_KEY_ID = credentials.AWS_ACCESS_KEY_ID;
-    process.env.AWS_SECRET_ACCESS_KEY = credentials.AWS_SECRET_ACCESS_KEY;
-  }
-
   let signedRequest = aws4.sign(request);
 
   delete signedRequest.headers['Host'];
@@ -47,6 +40,7 @@ async function getRestaurants() {
   }
 
   const { data } = await axios(signedRequest);
+
   return data;
 }
 
@@ -60,6 +54,7 @@ exports.handler = async function(event, context) {
     cognitoClientId,
     searchUrl: `${restaurantsApiRoot}/search`,
   };
+
   const html = mustache.render(template, view);
 
   return {
