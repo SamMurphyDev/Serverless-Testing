@@ -14,7 +14,7 @@ const respondFrom = httpRes => {
     'headers.content-type',
     'application/json'
   );
-  const body = contentType === 'application/json' ? httpRes.body : httpRes.data;
+  const body = contentType === 'application/json' ? httpRes.data : httpRes.data;
 
   return {
     statusCode: httpRes.status,
@@ -25,22 +25,10 @@ const respondFrom = httpRes => {
 
 const signHttpRequest = (url, httpReq) => {
   const urlData = URL.parse(url);
-  const opts = {
-    host: urlData.hostname,
-    path: urlData.pathname,
-    url: url,
-  };
-
-  const signedRequest = aws4.sign(opts);
-
+  httpReq['host'] = urlData.hostname;
   httpReq['path'] = urlData.pathname;
-  httpReq['host'] = signedRequest.headers['Host'];
-  httpReq['X-Amz-Date'] = signedRequest.headers['X-Amz-Date'];
-  httpReq['Authorization'] = signedRequest.headers['Authorization'];
-  if (signedRequest.headers['X-Amz-Security-Token']) {
-    httpReq['X-Amz-Security-Token'] =
-      signedRequest.headers['X-Amz-Security-Token'];
-  }
+
+  aws4.sign(httpReq);
 };
 
 let viaHttp = async (relPath, method, opts) => {
@@ -56,11 +44,20 @@ let viaHttp = async (relPath, method, opts) => {
       httpReq['data'] = opts['body'];
     }
 
+    const authHeader = _.get(opts, 'auth');
+    if (authHeader) {
+      httpReq = {
+        ...httpReq,
+        headers: {
+          Authorization: authHeader,
+        },
+      };
+    }
+
     if (_.get(opts, 'iam_auth', false) === true) {
       signHttpRequest(url, httpReq);
     }
 
-    console.log(httpReq);
     const res = await axios(httpReq);
     return respondFrom(res);
   } catch (err) {
@@ -80,14 +77,17 @@ const viaHandler = async (event, functionName) => {
   let context = {};
 
   let response = await handler(event, context);
+
   const contentType = _.get(
     response,
-    'headers.Content-Type',
+    'headers.content-type',
     'application/json'
   );
+
   if (response.body && contentType === 'application/json') {
     response.body = JSON.parse(response.body);
   }
+
   return response;
 };
 
@@ -109,13 +109,13 @@ let we_invoke_get_restaurants = async () => {
   return res;
 };
 
-let we_invoke_search_restaurants = async theme => {
+let we_invoke_search_restaurants = async (user, theme) => {
   const body = JSON.stringify({ theme });
-
+  const auth = user.idToken;
   const res =
     mode === 'handler'
       ? viaHandler({ body }, 'search-restaurants')
-      : viaHttp('restaurants/search', 'POST', { body });
+      : viaHttp('restaurants/search', 'POST', { body, auth });
 
   return res;
 };

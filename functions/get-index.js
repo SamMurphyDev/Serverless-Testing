@@ -5,6 +5,7 @@ const mustache = require('mustache');
 const axios = require('axios');
 const aws4 = require('aws4');
 const URL = require('url');
+const awscred = require('awscred');
 
 const awsRegion = process.env.region;
 const cognitoUserPoolId = process.env.cognito_user_pool_id;
@@ -30,6 +31,15 @@ async function getRestaurants() {
     method: 'GET',
   };
 
+  if (!process.env.AWS_ACCESS_KEY_ID) {
+    let { credentials } = await new Promise(resolve =>
+      awscred.load((err, data) => resolve(data))
+    );
+
+    process.env.AWS_ACCESS_KEY_ID = credentials.accessKeyId;
+    process.env.AWS_SECRET_ACCESS_KEY = credentials.secretAccessKey;
+  }
+
   let signedRequest = aws4.sign(request);
 
   delete signedRequest.headers['Host'];
@@ -38,6 +48,9 @@ async function getRestaurants() {
   if (!signedRequest.headers['X-Amz-Security-Token']) {
     delete signedRequest.headers['X-Amz-Security-Token'];
   }
+
+  console.log('get-index');
+  console.log(signedRequest);
 
   const { data } = await axios(signedRequest);
 
@@ -61,7 +74,7 @@ exports.handler = async function(event, context) {
     statusCode: 200,
     body: html,
     headers: {
-      'Content-Type': 'text/html; charset=UTF-8',
+      'content-type': 'text/html; charset=UTF-8',
     },
   };
 };
