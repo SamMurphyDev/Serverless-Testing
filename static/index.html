@@ -335,7 +335,7 @@
         xhr.open('POST', PLACE_ORDER_URL, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.setRequestHeader('Authorization', idToken);
-        xhr.send(JSON.stringify({ restaurantName }));
+        xhr.send(JSON.stringify({ restaurantName, idToken }));
 
         xhr.onreadystatechange = function(e) {
           if (xhr.readyState === 4 && xhr.status === 200) {

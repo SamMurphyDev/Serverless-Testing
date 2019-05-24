@@ -13,9 +13,9 @@ describe('Given an authenticated user', async () => {
     user = await given.an_authenticated_user();
   });
 
-  // after(async () => {
-  //   await teardown.an_authenticated_user(user);
-  // });
+  after(async () => {
+    await teardown.an_authenticated_user(user);
+  });
 
   describe(`When we invoke the POST /restaurants/search endpoint with theme 'cartoon'`, async () => {
     it(`Should return an array of 4 restaurants`, async () => {

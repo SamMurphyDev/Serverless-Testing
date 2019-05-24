@@ -15,6 +15,9 @@ provider:
     - Effect: Allow
       Action: execute-api:Invoke
       Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:*/*/GET/restaurants
+    - Effect: Allow
+      Action: kinesis:PutRecord
+      Resource: arn:aws:kinesis:#{AWS::Region}:#{AWS::AccountId}:stream/order-events
 functions:
   get-index:
     handler: functions/get-index.handler
@@ -26,6 +29,7 @@ functions:
       restaurants_api: https://rqpsqbjlw7.execute-api.ap-southeast-2.amazonaws.com/dev/restaurants
       cognito_user_pool_id: ap-southeast-2_pxs41rjSB
       cognito_client_id: 69o22b6dfgt2s2cpa1t0kbbgv
+      orders_api: https://rqpsqbjlw7.execute-api.ap-southeast-2.amazonaws.com/dev/orders
 
   get-restaurants:
     handler: functions/get-restaurants.handler
@@ -45,9 +49,20 @@ functions:
           path: /restaurants/search
           method: post
           authorizer:
-            arn: arn:aws:cognito-idp:ap-southeast-2:351620374931:userpool/ap-southeast-2_pxs41rjSB
+            arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/ap-southeast-2_pxs41rjSB
     environment:
       restaurants_table: restaurants
+
+  place-order:
+    handler: functions/place-order.handler
+    events:
+      - http:
+          path: /orders
+          method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/ap-southeast-2_pxs41rjSB
+    environment:
+      order_event_stream: order-events
 resources:
   Resources:
     restaurantsTable:
@@ -63,3 +78,8 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    orderEventsStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: order-events
+        ShardCount: 1

@@ -5,17 +5,18 @@
   "main": "index.js",
   "dependencies": {
     "aws4": "^1.8.0",
+    "awscred": "^1.4.2",
     "axios": "^0.18.0",
     "chai": "^4.2.0",
+    "chance": "^1.0.18",
     "file-system": "^2.2.2",
+    "jwt-decode": "^2.2.0",
     "loadash": "^1.0.0",
     "mustache": "^3.0.1",
     "serverless-pseudo-parameters": "^2.4.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.460.0",
-    "awscred": "^1.4.2",
-    "chance": "^1.0.18",
     "cheerio": "^1.0.0-rc.3",
     "mocha": "^6.1.4",
     "serverless": "^1.43.0"
