@@ -6,7 +6,7 @@
   "dependencies": {
     "aws4": "^1.8.0",
     "awscred": "^1.4.2",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "chai": "^4.2.0",
     "chance": "^1.0.18",
     "file-system": "^2.2.2",
